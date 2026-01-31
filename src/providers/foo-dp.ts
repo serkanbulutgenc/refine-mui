@@ -5,8 +5,10 @@ import {
   refreshTokenAfterResponseHook,
 } from '@refinedev/rest';
 
+
+'
 const { dataProvider, kyInstance } = createDataProvider(
-  'https://jsonplaceholder.typicode.com',
+  import.meta.env.VITE_BASE_API_URL,
   {
     getList: {
       getEndpoint: ({ resource }) => resource,
@@ -79,12 +81,13 @@ const { dataProvider, kyInstance } = createDataProvider(
     },
     update: {
       getEndpoint: ({ resource, id }) => `/${resource}/${id}`,
-    },
+    }
   },
   {
+    prefixUrl:'/api',
     hooks: {
       beforeRequest: [
-        authHeaderBeforeRequestHook({})
+        //authHeaderBeforeRequestHook({})
         (request, options, {retryCount}) => {
             // Only set default auth header on initial request, not on retries
             // (retries may have refreshed token set by beforeRetry)
@@ -92,8 +95,10 @@ const { dataProvider, kyInstance } = createDataProvider(
                 request.headers.set('Authorization', 'token initial-token');
             }
         }
-    ]
+    ],
   }
+}
 );
+
 
 export { dataProvider };
