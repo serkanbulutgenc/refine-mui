@@ -40,7 +40,7 @@ export default function PostCreate() {
 
   const submitForm = async (values: FieldValues) => {
     console.log(values);
-    await onFinish({ ...values, categoryId: values.category?.id ?? null });
+    await onFinish(values);
   };
 
   return (

@@ -1,6 +1,7 @@
 import { type AuthProvider, type HttpError } from '@refinedev/core';
 
 //https://bookish-space-fortnight-6pxp5xpr7w255vv-8000.app.github.dev/_allauth/{client}/v1/auth/login
+const BASE_API_URl = import.meta.env.VITE_BASE_API_URL
 
 export const authProvider: AuthProvider = {
   check: async () => {
@@ -16,7 +17,7 @@ export const authProvider: AuthProvider = {
 
   login: async ({ loginType, password }) => {
     const res = await fetch(
-      `https://bookish-space-fortnight-6pxp5xpr7w255vv-8000.app.github.dev/_allauth/app/v1/auth/login`,
+      `${BASE_API_URl}/_allauth/app/v1/auth/login`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,7 +82,7 @@ export const authProvider: AuthProvider = {
     } = JSON.parse(localStorage.getItem('auth') || '');
 
     const response = await fetch(
-      'https://bookish-space-fortnight-6pxp5xpr7w255vv-8000.app.github.dev/_allauth/app/v1/auth/session',
+      `${BASE_API_URl}/_allauth/app/v1/auth/session`,
       {
         headers: {
           //Authorization: `Bearer ${session_token}`,

@@ -1,6 +1,6 @@
 import { Refine, Authenticated } from '@refinedev/core';
 import routerProvider, { NavigateToResource } from '@refinedev/react-router';
-import { dataProvider } from './providers/data-provider';
+import { dataProvider as postDataProvider } from './providers/post-dp';
 import PostShow from './pages/posts/show';
 import PostUpdate from './pages/posts/update';
 import PostList from './pages/posts/list';
@@ -21,6 +21,7 @@ import { ThemedTitle } from './components/layout/title';
 import { theme } from './themes';
 
 function App() {
+  console.log(import.meta.env.VITE_BASE_API_URL)
   return (
     <BrowserRouter>
       <ThemeProvider theme={theme}>
@@ -28,7 +29,7 @@ function App() {
         <GlobalStyles styles={{ html: { WebkitFontSmoothing: 'auto' } }} />
         <RefineSnackbarProvider>
           <Refine
-            dataProvider={dataProvider}
+            dataProvider={postDataProvider}
             authProvider={authProvider}
             routerProvider={routerProvider}
             notificationProvider={useNotificationProvider}

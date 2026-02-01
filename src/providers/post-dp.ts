@@ -4,21 +4,21 @@ import {
   authHeaderBeforeRequestHook,
   refreshTokenAfterResponseHook,
 } from '@refinedev/rest';
+   
+console.log("-- ",import.meta.env.VITE_BASE_API_URL)
 
-
-'
 const { dataProvider, kyInstance } = createDataProvider(
-  import.meta.env.VITE_BASE_API_URL,
+  import.meta.env.VITE_BASE_API_URL+'/api',
   {
     getList: {
       getEndpoint: ({ resource }) => resource,
       getTotalCount: async (response) => {
-        const { total } = await response.json();
-        return total;
+        const { count } = await response.json();
+        return count;
       },
       mapResponse: async (response) => {
         //API returns {data:[]}
-        const { data } = await response.json();
+        const { results:data } = await response.json();
         return data;
       },
       //buildHeaders: {},
@@ -26,7 +26,7 @@ const { dataProvider, kyInstance } = createDataProvider(
         const query: Record<string, any> = {};
 
         //Pagination
-        query.pageSize = pagination?.pageSize ?? 10;
+        query.page_size = pagination?.pageSize ?? 10;
         query.page = pagination?.page ?? 1;
 
         //Sorters and Filters
@@ -35,7 +35,7 @@ const { dataProvider, kyInstance } = createDataProvider(
       },
     },
     getOne: {
-      getEndpoint: ({ resource, id }) => `/${resource}/${id}`,
+      getEndpoint: ({ resource, id }) => `${resource}/${id}`,
       //buildQueryParams:({})=>{}
       mapResponse: async (response, params) => {
         const data = await response.json();
@@ -45,7 +45,7 @@ const { dataProvider, kyInstance } = createDataProvider(
       },
     },
     deleteOne: {
-      getEndpoint: ({ resource, id }) => `/${resource}/${id}`,
+      getEndpoint: ({ resource, id }) => `${resource}/${id}`,
       buildHeaders: async ({ resource, id, variables }) => ({
         'Content-Type': 'application/json',
       }),
@@ -65,13 +65,13 @@ const { dataProvider, kyInstance } = createDataProvider(
       },
     },
     create: {
-      getEndpoint: ({ resource }) => `/${resource}`,
+      getEndpoint: ({ resource }) => `${resource}/`,
       buildBodyParams: async ({ resource, variables }) => {
         //convert form variables according to the API
-        return {
-          dto: {
+        //ValiidateInput and return Error if any
+        return {          
             ...variables,
-          },
+            categoryId:variables.category.id          
         };
       },
       mapResponse: async (response, params) => {
@@ -80,24 +80,9 @@ const { dataProvider, kyInstance } = createDataProvider(
       },
     },
     update: {
-      getEndpoint: ({ resource, id }) => `/${resource}/${id}`,
+      getEndpoint: ({ resource, id }) => `${resource}/${id}`,
     }
-  },
-  {
-    prefixUrl:'/api',
-    hooks: {
-      beforeRequest: [
-        //authHeaderBeforeRequestHook({})
-        (request, options, {retryCount}) => {
-            // Only set default auth header on initial request, not on retries
-            // (retries may have refreshed token set by beforeRetry)
-            if (retryCount === 0) {
-                request.headers.set('Authorization', 'token initial-token');
-            }
-        }
-    ],
   }
-}
 );
 
 

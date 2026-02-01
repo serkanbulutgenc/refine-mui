@@ -1,7 +1,6 @@
 import { type DataProvider, type HttpError } from '@refinedev/core';
 
-const API_URL =
-  'https://bookish-space-fortnight-6pxp5xpr7w255vv-8000.app.github.dev/api';
+const API_URL =import.meta.env.VITE_BASE_API_URL+'/api'
 
 const fetcher = async (url: string, options?: RequestInit) => {
   const {
