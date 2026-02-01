@@ -1,14 +1,15 @@
+import type { UpdateParams } from "@refinedev/core";
 import {
   createDataProvider,
   type CreateDataProviderOptions,
   authHeaderBeforeRequestHook,
   refreshTokenAfterResponseHook,
-} from '@refinedev/rest';
-   
-console.log("-- ",import.meta.env.VITE_BASE_API_URL)
+} from "@refinedev/rest";
+
+console.log("-- ", import.meta.env.VITE_BASE_API_URL);
 
 const { dataProvider, kyInstance } = createDataProvider(
-  import.meta.env.VITE_BASE_API_URL+'/api',
+  import.meta.env.VITE_BASE_API_URL + "/api",
   {
     getList: {
       getEndpoint: ({ resource }) => resource,
@@ -18,7 +19,7 @@ const { dataProvider, kyInstance } = createDataProvider(
       },
       mapResponse: async (response) => {
         //API returns {data:[]}
-        const { results:data } = await response.json();
+        const { results: data } = await response.json();
         return data;
       },
       //buildHeaders: {},
@@ -27,9 +28,12 @@ const { dataProvider, kyInstance } = createDataProvider(
 
         //Pagination
         query.page_size = pagination?.pageSize ?? 10;
-        query.page = pagination?.page ?? 1;
+        query.page = pagination?.currentPage ?? 1;
 
         //Sorters and Filters
+        if (sorters?.length) {
+          query.sort = sorters.map(({ field, order }) => ({ field: order }));
+        }
 
         return query;
       },
@@ -47,7 +51,7 @@ const { dataProvider, kyInstance } = createDataProvider(
     deleteOne: {
       getEndpoint: ({ resource, id }) => `${resource}/${id}`,
       buildHeaders: async ({ resource, id, variables }) => ({
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       }),
       mapResponse: async (response, params) => {
         const json = await response.json();
@@ -69,9 +73,9 @@ const { dataProvider, kyInstance } = createDataProvider(
       buildBodyParams: async ({ resource, variables }) => {
         //convert form variables according to the API
         //ValiidateInput and return Error if any
-        return {          
-            ...variables,
-            categoryId:variables.category.id          
+        return {
+          ...variables,
+          categoryId: variables.category.id,
         };
       },
       mapResponse: async (response, params) => {
@@ -81,9 +85,34 @@ const { dataProvider, kyInstance } = createDataProvider(
     },
     update: {
       getEndpoint: ({ resource, id }) => `${resource}/${id}`,
-    }
-  }
-);
+      // Add required headers for put/patch requests
+      getRequestMethod: (params: UpdateParams<any>) => "put",
 
+      buildBodyParams: ({ resource, id, variables, meta }) => {
+        //console.log(params);
+        return {
+          ...variables,
+          categoryId: variables.category.id,
+        };
+      },
+      mapResponse: async (response, params) => {
+        console.log(params);
+      },
+    },
+    getMany: {
+      getEndpoint: ({ resource, ids }) => `${resource}/`,
+      buildQueryParams: async ({ resource, ids, meta }) => {
+        const query: Record<string, any> = {};
+
+        query.ids = ids.join(",") ?? null;
+        return query;
+      },
+      mapResponse: async (response) => {
+        const { results } = await response.json();
+        return results;
+      },
+    },
+  },
+);
 
 export { dataProvider };
