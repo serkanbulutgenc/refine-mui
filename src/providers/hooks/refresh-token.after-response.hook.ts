@@ -30,21 +30,23 @@ type RefreshTokenAfterResponseHookOptions = {
  */
 export const refreshTokenAfterResponseHook =
   (
-    refineOptions: RefreshTokenAfterResponseHookOptions
+    refineOptions: RefreshTokenAfterResponseHookOptions,
   ): NonNullable<Hooks["afterResponse"]>[number] =>
   async (request, _options, response) => {
     if (response.status === 401) {
       const currentRefreshToken = localStorage.getItem(
-        refineOptions.REFRESH_TOKEN_KEY
+        refineOptions.REFRESH_TOKEN_KEY,
       );
 
       try {
-        const {data:{access_token,refresh_token}} = await ky<{ data:{access_token: string; refresh_token: string }}>(
+        const {
+          data: { access_token, refresh_token, session_token },
+        } = await ky<{ data: { access_token: string; refresh_token: string } }>(
           refineOptions.REFRESH_TOKEN_URL,
           {
             method: "post",
             body: JSON.stringify({ refresh_token: currentRefreshToken }),
-          }
+          },
         ).json();
 
         localStorage.setItem(refineOptions.ACCESS_TOKEN_KEY, access_token);

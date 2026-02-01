@@ -2,11 +2,9 @@ import type { UpdateParams } from "@refinedev/core";
 import {
   createDataProvider,
   type CreateDataProviderOptions,
-  authHeaderBeforeRequestHook
+  authHeaderBeforeRequestHook,
 } from "@refinedev/rest";
 import { refreshTokenAfterResponseHook } from "./hooks/refresh-token.after-response.hook";
-
-console.log("-- ", import.meta.env.VITE_BASE_API_URL);
 
 const { dataProvider, kyInstance } = createDataProvider(
   import.meta.env.VITE_BASE_API_URL + "/api",
@@ -114,19 +112,20 @@ const { dataProvider, kyInstance } = createDataProvider(
     },
   },
   {
-    hooks:{
-      beforeRequest:[
-        authHeaderBeforeRequestHook({ACCESS_TOKEN_KEY:'access_token'})
+    hooks: {
+      beforeRequest: [
+        authHeaderBeforeRequestHook({ ACCESS_TOKEN_KEY: "access_token" }),
       ],
-      afterResponse:[
+      afterResponse: [
         refreshTokenAfterResponseHook({
           ACCESS_TOKEN_KEY: "access_token",
           REFRESH_TOKEN_KEY: "refresh_token",
-          REFRESH_TOKEN_URL: import.meta.env.VITE_AUTH_API_URL,
-        })
-      ]
-    }
-  }
+          REFRESH_TOKEN_URL:
+            import.meta.env.VITE_AUTH_API_URL + "/tokens/refresh",
+        }),
+      ],
+    },
+  },
 );
 
 export { dataProvider };

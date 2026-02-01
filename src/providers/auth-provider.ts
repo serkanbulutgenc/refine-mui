@@ -1,31 +1,28 @@
-import { type AuthProvider, type HttpError } from '@refinedev/core';
+import { type AuthProvider, type HttpError } from "@refinedev/core";
 
 //https://bookish-space-fortnight-6pxp5xpr7w255vv-8000.app.github.dev/_allauth/{client}/v1/auth/login
-const BASE_API_URl = import.meta.env.VITE_BASE_API_URL
+const BASE_API_URl = import.meta.env.VITE_BASE_API_URL;
 
 export const authProvider: AuthProvider = {
   check: async () => {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem("access_token");
 
     if (token) {
       return { authenticated: true };
     }
 
-    return { authenticated: false, logout: true, redirectTo: '/login' };
+    return { authenticated: false, logout: true, redirectTo: "/login" };
   },
 
   login: async ({ loginType, password }) => {
-    const res = await fetch(
-      `${BASE_API_URl}/_allauth/app/v1/auth/login`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: loginType,
-          password,
-        }),
-      }
-    );
+    const res = await fetch(`${BASE_API_URl}/_allauth/app/v1/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: loginType,
+        password,
+      }),
+    });
 
     if (res.status !== 200) {
       return {
@@ -34,42 +31,45 @@ export const authProvider: AuthProvider = {
       };
     }
 
-    const {meta:{access_token, refresh_token}} = await res.json();
+    const {
+      meta: { access_token, refresh_token, session_token },
+    } = await res.json();
 
     if (access_token) {
-      localStorage.setItem('access_token', access_token);
-      localStorage.setItem('refresh_token', refresh_token)
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("refresh_token", refresh_token);
+      localStorage.setItem("session_token", session_token);
       return {
         success: true,
-        redirectTo: '/',
+        redirectTo: "/",
         successNotification: {
-          message: ' success',
-          description: 'Successfully logged in to the app',
+          message: " success",
+          description: "Successfully logged in to the app",
         },
       };
     }
 
-    return { success: false, redirectTo: '/login' };
+    return { success: false, redirectTo: "/login" };
   },
 
-
   logout: async () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token')
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("session_token");
 
     return {
       success: true,
-      redirectTo: '/login',
+      redirectTo: "/login",
     };
   },
 
   onError: async (error: HttpError) => {
     if (error.status === 401) {
-      console.log('error: ', JSON.stringify(error.status));
+      console.log("error: ", JSON.stringify(error.status));
 
       return {
         logout: true,
-        redirectTo: '/login',
+        redirectTo: "/login",
         error,
       };
     }
@@ -78,17 +78,17 @@ export const authProvider: AuthProvider = {
   },
 
   getIdentity: async () => {
-    const token = localStorage.getItem('access_token');
+    const session_token = localStorage.getItem("session_token");
 
     const response = await fetch(
       `${BASE_API_URl}/_allauth/app/v1/auth/session`,
       {
         headers: {
-          //Authorization: `Bearer ${session_token}`,
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          "X-Session-Token": `${session_token}`,
+          //Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (response.status < 200 || response.status > 299) {
@@ -98,7 +98,7 @@ export const authProvider: AuthProvider = {
       data: { user },
     } = await response.json();
     return {
-      avatar: 'https://picsum.photos/200',
+      avatar: "https://picsum.photos/200",
       email: user.email,
       username: user.username,
       name: user.display,
