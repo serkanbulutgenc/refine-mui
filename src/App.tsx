@@ -1,6 +1,6 @@
 import { Refine, Authenticated } from '@refinedev/core';
 import routerProvider, { NavigateToResource } from '@refinedev/react-router';
-import { dataProvider as postDataProvider } from './providers/post-dp';
+import { dataProvider } from './providers/data-provider';
 import PostShow from './pages/posts/show';
 import PostUpdate from './pages/posts/update';
 import PostList from './pages/posts/list';
@@ -29,7 +29,7 @@ function App() {
         <GlobalStyles styles={{ html: { WebkitFontSmoothing: 'auto' } }} />
         <RefineSnackbarProvider>
           <Refine
-            dataProvider={postDataProvider}
+            dataProvider={dataProvider}
             authProvider={authProvider}
             routerProvider={routerProvider}
             notificationProvider={useNotificationProvider}

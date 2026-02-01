@@ -5,10 +5,9 @@ const BASE_API_URl = import.meta.env.VITE_BASE_API_URL
 
 export const authProvider: AuthProvider = {
   check: async () => {
-    const authData = localStorage.getItem('auth');
+    const token = localStorage.getItem('access_token');
 
-    if (authData) {
-      console.log('authData : ', authData);
+    if (token) {
       return { authenticated: true };
     }
 
@@ -35,10 +34,11 @@ export const authProvider: AuthProvider = {
       };
     }
 
-    const data = await res.json();
+    const {meta:{access_token, refresh_token}} = await res.json();
 
-    if (data) {
-      localStorage.setItem('auth', JSON.stringify({ ...data }));
+    if (access_token) {
+      localStorage.setItem('access_token', access_token);
+      localStorage.setItem('refresh_token', refresh_token)
       return {
         success: true,
         redirectTo: '/',
@@ -54,7 +54,8 @@ export const authProvider: AuthProvider = {
 
 
   logout: async () => {
-    localStorage.removeItem('auth');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token')
 
     return {
       success: true,
@@ -66,27 +67,25 @@ export const authProvider: AuthProvider = {
     if (error.status === 401) {
       console.log('error: ', JSON.stringify(error.status));
 
-      /*return {
+      return {
         logout: true,
         redirectTo: '/login',
         error,
-      };*/
+      };
     }
 
     return {};
   },
 
   getIdentity: async () => {
-    const {
-      meta: { session_token },
-    } = JSON.parse(localStorage.getItem('auth') || '');
+    const token = localStorage.getItem('access_token');
 
     const response = await fetch(
       `${BASE_API_URl}/_allauth/app/v1/auth/session`,
       {
         headers: {
           //Authorization: `Bearer ${session_token}`,
-          'X-Session-Token': `${session_token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       }

@@ -9,6 +9,7 @@ import {
   TagField,
 } from '@refinedev/mui';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
+import { Stack } from '@mui/material';
 
 interface TCategory {
   id: number;
@@ -36,19 +37,21 @@ export default function PostsList() {
 
   const columns = React.useMemo<GridColDef<TPost>[]>(
     () => [
-      { field: 'id', type: 'number', maxWidth: 50 },
-      { field: 'title', type: 'string', flex: 1, headerName: 'Title' },
+      { field: 'id', type: 'number',  maxWidth:50},
+      { field: 'title', type: 'string', minWidth:100, display:'flex', flex:2, headerName: 'Title' },
       {
         field: 'slug',
         type: 'string',
         display: 'flex',
         headerName: 'Slug',
         minWidth: 100,
-        flex: 1,
+        flex: 2,
         renderCell: ({ row }) => <UrlField value={row.slug} />,
       },
       {
         field: 'category',
+        align:'center',
+        headerAlign:'center',
         valueGetter: (value) => {
           if (!value) return value;
           return value.title;
@@ -62,13 +65,18 @@ export default function PostsList() {
         field: 'actions',
         headerName: 'Actions',
         display: 'flex',
+        flex:1,
+        align:'right',
+        headerAlign:'right',
+        sortable:false,
+        disableColumnMenu:true,
         renderCell: function render({ row }) {
           return (
-            <>
+            <Stack spacing={1} direction={'row'}>
               <ShowButton hideText recordItemId={row.id} />
               <EditButton hideText recordItemId={row.id} />
               <DeleteButton size="small" recordItemId={row.id} />
-            </>
+            </Stack>
           );
         },
       },
