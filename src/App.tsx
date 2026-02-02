@@ -21,6 +21,18 @@ import { ThemedTitle } from "./components/layout/title";
 import { theme } from "./themes";
 //import { Provider } from "react-redux";
 //import { store } from "../store";
+import BookIcon from "@mui/icons-material/Book";
+import ArticleIcon from "@mui/icons-material/Article";
+import CategoryIcon from "@mui/icons-material/Category";
+import SettingsIcon from "@mui/icons-material/Settings";
+import {
+  CategoryCreate,
+  CategoryEdit,
+  CategoryList,
+  CategoryShow,
+} from "./pages/categories";
+import SettingsPage from "./pages/settings";
+import Dashboard from "./pages/dashboard";
 
 function App() {
   return (
@@ -35,13 +47,35 @@ function App() {
             routerProvider={routerProvider}
             notificationProvider={useNotificationProvider}
             resources={[
+              { name: "Blog", meta: { icon: <BookIcon /> } },
               {
                 name: "posts",
                 list: "/posts",
-                show: "/posts/:id",
-                edit: "/posts/:id/edit",
                 create: "/posts/create",
-                meta: { label: "Posts" },
+                show: "/posts/show/:id",
+                edit: "/posts/edit/:id",
+                meta: {
+                  label: "Posts",
+                  parent: "Blog",
+                  icon: <ArticleIcon />,
+                },
+              },
+              {
+                name: "categories",
+                list: "/category",
+                create: "/category/create",
+                edit: "/category/edit/:id",
+                show: "/category/show/:id",
+                meta: {
+                  label: "Categories",
+                  icon: <CategoryIcon />,
+                  parent: "Blog",
+                },
+              },
+              {
+                name: "settings",
+                list: "/settings",
+                meta: { label: "Settings", icon: <SettingsIcon /> },
               },
             ]}
           >
@@ -67,16 +101,21 @@ function App() {
                   </Authenticated>
                 }
               >
-                <Route
-                  index
-                  element={<NavigateToResource resource="posts" />}
-                />
+                <Route index element={<Dashboard />} />
                 <Route path="/posts">
                   <Route index element={<PostList />} />
-                  <Route path=":id" element={<PostShow />} />
-                  <Route path=":id/edit" element={<PostUpdate />} />
+                  <Route path="show/:id" element={<PostShow />} />
+                  <Route path="edit/:id" element={<PostUpdate />} />
                   <Route path="create" element={<PostCreate />} />
                 </Route>
+
+                <Route path="/category">
+                  <Route index element={<CategoryList />} />
+                  <Route path="show/:id" element={<CategoryShow />} />
+                  <Route path="edit/:id" element={<CategoryEdit />} />
+                  <Route path="create" element={<CategoryCreate />} />
+                </Route>
+                <Route path="/settings" element={<SettingsPage />} />
               </Route>
               <Route
                 element={

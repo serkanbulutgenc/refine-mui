@@ -52,10 +52,8 @@ const { dataProvider, kyInstance } = createDataProvider(
         "Content-Type": "application/json",
       }),
       mapResponse: async (response, params) => {
-        const json = await response.json();
-
         // Some APIs return just success confirmation
-        if (json.success && !json.data) {
+        if (response.status === 204) {
           // Return minimal record with just the ID for confirmation
           return { id: params.id };
         }
@@ -63,7 +61,7 @@ const { dataProvider, kyInstance } = createDataProvider(
         // Your API wraps the deleted record in a "data" property
         // API returns: { "data": { "id": 123, "title": "Deleted Post" } }
         // Refine needs: { "id": 123, "title": "Deleted Post" }
-        return json.data;
+        return response;
       },
     },
     create: {
