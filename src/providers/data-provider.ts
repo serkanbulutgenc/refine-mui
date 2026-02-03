@@ -69,6 +69,12 @@ const { dataProvider, kyInstance } = createDataProvider(
       buildBodyParams: async ({ resource, variables }) => {
         //convert form variables according to the API
         //ValiidateInput and return Error if any
+        console.log(resource, variables);
+        if (resource === "categories") {
+          return {
+            ...variables,
+          };
+        }
         return {
           ...variables,
           categoryId: variables.category.id,
@@ -85,7 +91,8 @@ const { dataProvider, kyInstance } = createDataProvider(
       getRequestMethod: (params: UpdateParams<any>) => "put",
 
       buildBodyParams: ({ resource, id, variables, meta }) => {
-        //console.log(params);
+        //console.log(resource, variables, id);
+
         return {
           ...variables,
           categoryId: variables.category.id,

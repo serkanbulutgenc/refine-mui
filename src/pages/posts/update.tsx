@@ -1,17 +1,17 @@
-import { useUpdate, useOne } from '@refinedev/core';
-import { useAutocomplete, Breadcrumb } from '@refinedev/mui';
-import { TextField, Autocomplete, Box, Stack, Button } from '@mui/material';
-import { Edit } from '@refinedev/mui';
-import { useForm } from '@refinedev/react-hook-form';
-import { Controller } from 'react-hook-form';
-import { PostFormSchema, type ICategory } from './create';
-import type { TPost } from '../../types';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useUpdate, useOne } from "@refinedev/core";
+import { useAutocomplete, Breadcrumb } from "@refinedev/mui";
+import { TextField, Autocomplete, Box, Stack, Button } from "@mui/material";
+import { Edit } from "@refinedev/mui";
+import { useForm } from "@refinedev/react-hook-form";
+import { Controller, type FieldValues } from "react-hook-form";
+import { PostFormSchema, type TCategoryAutoComplete } from "./create";
+import type { TPost } from "../../types";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function PostUpdate() {
   const {
-    saveButtonProps,
-    refineCore: { query, autoSaveProps },
+    handleSubmit,
+    refineCore: { query, autoSaveProps, onFinish },
     register,
     control,
 
@@ -21,27 +21,18 @@ export default function PostUpdate() {
   const post = query?.data?.data;
 
   const { autocompleteProps: categoryAutocompleteProps } =
-    useAutocomplete<ICategory>({
-      resource: 'categories',
+    useAutocomplete<TCategoryAutoComplete>({
+      resource: "categories",
       defaultValue: post?.category?.id,
     });
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const data = Object.fromEntries(
-      new FormData(event.currentTarget).entries()
-    );
-
-    onFinish({
-      ...data,
-      price: Number(data.price).toFixed(2),
-    });
+  const onSubmit = async (values: FieldValues) => {
+    await onFinish(values);
   };
 
   return (
     <Edit
-      saveButtonProps={saveButtonProps}
+      saveButtonProps={{ onClick: handleSubmit(onSubmit, (values) => {}) }}
       autoSaveProps={autoSaveProps}
       headerButtons={({ defaultButtons }) => (
         <>
@@ -49,22 +40,12 @@ export default function PostUpdate() {
           <Button variant="contained">Custom Button</Button>
         </>
       )}
-      breadcrumb={
-        <div
-          style={{
-            padding: '3px 6px',
-            border: '2px dashed cornflowerblue',
-          }}
-        >
-          <Breadcrumb />
-        </div>
-      }
     >
-      <Box component="form" sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Box component="form" sx={{ display: "flex", flexDirection: "column" }}>
         <Stack spacing={2}>
           <TextField
             size="small"
-            {...register('title')}
+            {...register("title")}
             defaultValue={post?.title}
             error={(errors as any)?.title}
             helperText={(errors as any)?.title?.message}
@@ -84,8 +65,8 @@ export default function PostUpdate() {
                   getOptionLabel={(item) => {
                     return (
                       categoryAutocompleteProps?.options?.find(
-                        (p) => p?.id?.toString() === item?.id?.toString()
-                      )?.title ?? ''
+                        (p) => p?.id?.toString() === item?.id?.toString(),
+                      )?.title ?? ""
                     );
                   }}
                   getOptionKey={(option) => option.id}
@@ -107,7 +88,7 @@ export default function PostUpdate() {
           <TextField
             size="small"
             multiline
-            {...register('body')}
+            {...register("body")}
             minRows={3}
             maxRows={10}
             defaultValue={post?.body}

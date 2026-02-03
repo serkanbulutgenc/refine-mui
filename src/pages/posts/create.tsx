@@ -1,27 +1,29 @@
-import { useForm } from '@refinedev/react-hook-form';
+import { useForm } from "@refinedev/react-hook-form";
+import { Create, useAutocomplete } from "@refinedev/mui";
+import { Box, TextField, Autocomplete } from "@mui/material";
+import { Controller, type FieldValues } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PostSchema } from "../../types/schemas";
+import type { TCategory, TPost } from "../../types";
+import { z } from "zod";
 
-import { Create, useAutocomplete } from '@refinedev/mui';
-import type { HttpError } from '@refinedev/core';
-import { Box, TextField, Autocomplete } from '@mui/material';
-import { Controller, type FieldValues } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { PostSchema } from '../../types/schemas';
-import type { TPost } from '../../types';
-import { z } from 'zod';
+export type TCategoryAutoComplete = Pick<TCategory, "id" | "title">;
 
-export interface ICategory {
-  id: number;
-  title: string;
-}
-
-export const PostFormSchema = PostSchema.extend({
-  categoryId: z.number().int().positive(),
-}).partial();
+export const PostFormSchema = PostSchema.omit({
+  category: true,
+  slug: true,
+  id: true,
+})
+  .extend({
+    category: z.object({
+      id: z.coerce.number().positive(),
+      title: z.string(),
+    }),
+  })
+  .partial();
 
 export default function PostCreate() {
   const {
-    //mutation,
-    //saveButtonProps,
     control,
     register,
     refineCore: { onFinish, formLoading },
@@ -33,13 +35,12 @@ export default function PostCreate() {
     resolver: zodResolver(PostFormSchema),
   });
 
-  const { autocompleteProps } = useAutocomplete<ICategory>({
-    resource: 'categories',
+  const { autocompleteProps } = useAutocomplete<TCategoryAutoComplete>({
+    resource: "categories",
     debounce: 500,
   });
 
   const submitForm = async (values: FieldValues) => {
-    console.log(values);
     await onFinish(values);
   };
 
@@ -47,19 +48,19 @@ export default function PostCreate() {
     <Create
       isLoading={formLoading}
       saveButtonProps={{
-        onClick: handleSubmit(submitForm, (values) =>
-          alert(JSON.stringify(values))
-        ),
+        onClick: handleSubmit(submitForm, (values) => {
+          console.error(values);
+        }),
       }}
     >
       <Box
         component="form"
-        sx={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+        sx={{ display: "flex", flexDirection: "column", gap: "12px" }}
       >
         <TextField
           variant="outlined"
           size="small"
-          {...register('title')}
+          {...register("title")}
           error={!!errors.title}
           helperText={(errors as any)?.title?.message}
           label="Title"
@@ -68,8 +69,8 @@ export default function PostCreate() {
           control={control}
           name="category"
           rules={{
-            required: 'This field is required',
-            value: 'Value error message',
+            required: "This field is required",
+            value: "Value error message",
           }}
           render={({ field: { value, onChange, ...rest } }) => (
             <Autocomplete
@@ -89,8 +90,8 @@ export default function PostCreate() {
               getOptionLabel={(item) => {
                 return (
                   autocompleteProps?.options?.find(
-                    (p) => p?.id?.toString() === item?.id?.toString()
-                  )?.title ?? ''
+                    (p) => p?.id?.toString() === item?.id?.toString(),
+                  )?.title ?? ""
                 );
               }}
               isOptionEqualToValue={(option, value) =>
@@ -116,7 +117,7 @@ export default function PostCreate() {
         <TextField
           variant="outlined"
           size="small"
-          {...register('body')}
+          {...register("body")}
           error={!!errors.body}
           helperText={(errors as any)?.body?.message}
           multiline

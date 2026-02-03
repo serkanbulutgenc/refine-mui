@@ -5,12 +5,15 @@ import {
   EditButton,
   List,
   ShowButton,
+  UrlField,
   useDataGrid,
 } from "@refinedev/mui";
 import React from "react";
 import type { TCategory } from "../../types";
+import { useNavigation } from "@refinedev/core";
 
 export const CategoryList = () => {
+  const { showUrl } = useNavigation();
   const {
     dataGridProps,
     tableQuery: { isLoading },
@@ -21,7 +24,7 @@ export const CategoryList = () => {
       {
         field: "id",
         type: "number",
-        headerName: "ID",
+        headerName: "#",
         maxWidth: 60,
         sortable: false,
         filterable: false,
@@ -32,6 +35,13 @@ export const CategoryList = () => {
         headerName: "Title",
         display: "flex",
         flex: 2,
+        renderCell: ({ row }) => {
+          return (
+            <UrlField value={showUrl("categories", row.id)}>
+              <span>{row.title}</span>
+            </UrlField>
+          );
+        },
       },
       {
         field: "actions",
@@ -44,9 +54,8 @@ export const CategoryList = () => {
         flex: 2,
         renderCell: ({ row }) => (
           <Stack spacing={1} direction={"row"}>
-            <ShowButton hideText recordItemId={row.id} />
-            <EditButton hideText recordItemId={row.id} />
-            <DeleteButton hideText recordItemId={row.id} />
+            <EditButton color="secondary" recordItemId={row.id} />
+            <DeleteButton recordItemId={row.id} />
           </Stack>
         ),
       },
@@ -56,7 +65,15 @@ export const CategoryList = () => {
 
   return (
     <List>
-      <DataGrid {...dataGridProps} columns={columns} />
+      <DataGrid
+        {...dataGridProps}
+        columns={columns}
+        pageSizeOptions={[
+          { label: "5", value: 5 },
+          { label: "10", value: 10 },
+          { label: "25", value: 25 },
+        ]}
+      />
     </List>
   );
 };
